@@ -12,14 +12,14 @@ const of = <T extends Tag<unknown>>(t: T) =>
 
 // Pattern match, matchers first, variant second
 const match = <M extends Record<string | symbol, (a: any) => unknown>>(matches: M) => <V extends VariantsFor<M>>(v: V): ResultOf<M, V> =>
-  (matches[(v.tag) as keyof M] as any)(v.value) // safe, but how to reduce casting?
+  (matches[(v.tag)])(v.value) as ResultOf<M, V>// safe, but how to reduce casting?
 
 // Flipped version of match, variant first, matchers second
 const matchr = <V extends Variant<string | symbol, unknown>>(v: V) => <M extends Matcher<V>>(matches: M): ResultOf<M, V> =>
-  (matches[(v.tag) as keyof M] as any)(v.value) // safe, but how to reduce casting?
+  (matches[(v.tag)])(v.value)
 
 const map = <M extends Record<string | symbol, (a: any) => unknown>>(mappers: M) => <V extends VariantsFor<M>>(vf: V): MapVariants<M, V> =>
-  of(tag(vf.tag as any))((mappers[(vf.tag) as keyof M] as any)(vf.value)) as MapVariants<M, V> // safe, but how to reduce casting?
+  of(tag(vf.tag))((mappers[(vf.tag)])(vf.value)) as MapVariants<M, V> // safe, but how to reduce casting?
 
 type MapVariants<M, V> = V extends Variant<infer T extends keyof M, infer A> ?
   M extends Record<T, (a: A) => infer B> ? Variant<T, B>
@@ -56,9 +56,9 @@ const r3 = map({
 console.log(r1, r2, r3)
 
 // Supporting types
-type VariantsFor<M extends Record<string, unknown>> = {
+type VariantsFor<M extends Record<string, unknown>> = Extract<{
   [K in keyof M]: M[K] extends (a: infer A) => unknown ? Variant<K, A> : never
-}[keyof M]
+}[keyof M], Variant<any, any>>
 
 type ResultOf<M, V> = V extends Variant<infer T extends keyof M, infer A> ?
   M extends Record<T, (a: A) => infer B> ? B
