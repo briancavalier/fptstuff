@@ -22,17 +22,27 @@ type Any<R> =
   : R extends readonly [] ? never
   : never
 
-type Int = { system: 'Int' }
+type Int = { numberSystem: 'Int' }
 
-type Positive = { gt: 0 }
+type Eq<A> = { eq: A }
+type GT<A> = { gt: A }
+type LT<A> = { lt: A }
+type Finite = { finite: true }
 
 const isInteger = <N extends number>(n: N): n is N & Int => Number.isInteger(n)
-const isPositive = <N extends number>(n: N): n is N & Positive => typeof n === 'number' && n > 0
+const isFinite = <N extends number>(n: N): n is N & Finite => Number.isFinite(n)
 
-type T = Any<[typeof isInteger<1>]>
-const t1 = all(isInteger, isPositive)
-const t2 = any(isInteger, isPositive)
+const gt = <N extends number>(n: N) => <X extends number>(x: X): x is X & GT<N> => x > n
+const lt = <N extends number>(n: N) => <X extends number>(x: X): x is X & LT<N> => x < n
+const eq = <N extends number>(n: N) => <X extends number>(x: X): x is X & Eq<N> => x === n as number
 
-const x = 1
-if (t2(x)) x
+const positive = gt(0)
+const nonNegative = any(eq(0), gt(0))
+const negative = lt(0)
+const nonPositive = any(eq(0), lt(0))
+
+const t1 = all(isInteger, positive, isFinite)
+
+const x: number = 1
+if (t1(x)) x
 else x
