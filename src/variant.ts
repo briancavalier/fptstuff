@@ -43,8 +43,6 @@ type Matchers<V extends Variant<string | symbol, unknown>> =
 
 type Matcher<V extends Variant<string | symbol, unknown>> = UnionToIntersection<Matchers<V>>
 
-const v = <T>(t: T) => [variant(t), is(t)] as const
-
 // Example
 // We can build Either using open variants
 
