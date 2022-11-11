@@ -62,17 +62,23 @@ const right = variant(Right)
 const isLeft = is(Left)
 const isRight = is(Right)
 
-const t = right(123) as Either<string, number>
+// Example smart constructor
+const either = <A>(a: A | null | undefined): Either<null, A> =>
+  a == null ? left(null) : right(a)
 
 // Reconstruct the typical polymorphic map function for Either
-const f = <A, B, C>(g: (a: B) => C, v: Either<A, B>): Either<A, C> =>
+const mapEither = <A, B, C>(g: (a: B) => C, v: Either<A, B>): Either<A, C> =>
   isLeft(v) ? v : right(g(v.value))
 
-const x = f(x => x, t)
+// Create an Either
+const t = either(123)
 
-// Pattern matching
-const y = match(t)({
-  [Right]: x => x === 123,
+// Map
+const x = mapEither(x => String(x), t)
+
+// Pattern match
+const y = match(x)({
+  [Right]: x => x.length > 0,
   [Left]: x => x
 })
 
